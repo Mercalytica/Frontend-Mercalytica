@@ -214,21 +214,23 @@ const ChatPage: React.FC = () => {
         botResponse = data.reply;
       }
 
-      // ✅ Detectar PDF en la respuesta
-      if (botResponse && botResponse.includes("/api/reports/download/")) {
-        const pdfMatch = botResponse.match(/\/api\/reports\/download\/[^\s]+/);
-        if (pdfMatch) {
-          const pdfPath = pdfMatch[0];
-          pdfUrl = `${BACKEND_URL}${pdfPath}`;
-          pdfName = `reporte_${Date.now()}.pdf`;
-          
-          // Limpiar el texto
-          botResponse = botResponse.replace(pdfPath, '').trim();
-          if (!botResponse) {
-            botResponse = "📊 He generado un reporte PDF para ti. ¡Puedes descargarlo abajo!";
-          }
-        }
-      }
+
+if (data.pdf_url) {
+  pdfUrl = `${BACKEND_URL}${data.pdf_url}`;
+  pdfName = data.pdf_url.split("/").pop();
+} else if (botResponse && botResponse.includes("/api/reports/download/")) {
+  const pdfMatch = botResponse.match(/\/api\/reports\/download\/[^\s]+/);
+  if (pdfMatch) {
+    const pdfPath = pdfMatch[0];
+    pdfUrl = `${BACKEND_URL}${pdfPath}`;
+    pdfName = pdfPath.split("/").pop();
+    botResponse = botResponse.replace(pdfPath, '').trim();
+    if (!botResponse) {
+      botResponse = " He generado un reporte PDF para ti. ¡Puedes descargarlo abajo!";
+    }
+  }
+}
+
 
       const botMessage: ChatMessage = {
         id: uuidv4(),
